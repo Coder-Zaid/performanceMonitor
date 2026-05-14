@@ -1,0 +1,488 @@
+{
+  "project": {
+    "name": "ITSPRELUDE Performance System",
+    "description": "AI-powered workforce performance & productivity management SaaS platform. Multi-tenant. Tracks employee performance, KPIs, accountability, productivity, and generates business intelligence.",
+    "target_audience": ["Startups", "Agencies", "Sales organizations", "Recruitment firms", "Service businesses", "Mid-sized enterprises"],
+    "user_roles": ["super_admin", "founder", "manager", "employee"]
+  },
+
+  "tech_stack": {
+    "frontend": {
+      "framework": "Next.js 14 (App Router) + React 19",
+      "styling": "Tailwind CSS 4 (zero runtime, purged unused)",
+      "components": "ShadCN UI (tree-shaken imports only)",
+      "charts": "Recharts (lazy loaded via next/dynamic, ssr: false)",
+      "forms": "React Hook Form + Zod (minimal re-renders, type-safe)",
+      "server_state": "TanStack Query (React Query) — caching, optimistic updates",
+      "client_state": "Zustand (~1KB) — theme, sidebar toggle only",
+      "icons": "Lucide React (tree-shaken, import only what you use)",
+      "fonts": "Inter + JetBrains Mono + Manrope — self-hosted woff2, font-display: swap",
+      "auth": "NextAuth.js (JWT with httpOnly refresh tokens, or Clerk)",
+      "middleware": "Auth + role-based route guarding"
+    },
+    "backend": {
+      "framework": "NestJS + Express.js",
+      "orm": "Prisma",
+      "database": "PostgreSQL 16",
+      "cache": "Redis 7 (caching + BullMQ job queue)",
+      "api": "REST (JSON) + WebSocket (NestJS Gateway)",
+      "file_storage": "AWS S3 (avatars, proofs, reports)"
+    },
+    "bundle_budget": {
+      "initial_js_gzip": "<= 150KB",
+      "initial_css_gzip": "<= 30KB",
+      "lcp": "< 1.8s",
+      "tti": "< 2.5s",
+      "fid": "< 50ms",
+      "cls": "< 0.1"
+    }
+  },
+
+  "build_order_phases": {
+    "phase_1_foundation": {
+      "hours": "1-4",
+      "tasks": [
+        "Project init: create-next-app with TS + Tailwind + App Router, shadcn init",
+        "Configure tailwind.config.ts with custom colors, fonts, radii, shadows",
+        "Self-host fonts in public/fonts/",
+        "Create globals.css with design tokens as CSS custom properties",
+        "Setup lib/api-client.ts (fetch wrapper with auto-refresh on 401)",
+        "Setup lib/auth.ts (NextAuth config with credentials + Google OAuth)",
+        "Setup providers (ThemeProvider, QueryClientProvider, SessionProvider)",
+        "Create root layout.tsx with font loading (next/font)",
+        "Create middleware.ts (auth check + role-based route redirect)",
+        "Login page (email/password form with validation)",
+        "Register page (org creation wizard with steps)",
+        "Forgot password page",
+        "Dashboard layout (sidebar + top navbar + responsive drawer on mobile)",
+        "Sidebar component (collapsible, menu items filtered by role)",
+        "Theme toggle (dark/light, persisted to localStorage, respects prefers-color-scheme)",
+        "Error boundary at root + per route segment"
+      ]
+    },
+    "phase_2_core": {
+      "hours": "5-10",
+      "tasks": [
+        "Employee dashboard: DailyTargetsCard, SubmissionForm, PerformanceSummary, YourRank",
+        "Daily performance submission with dynamic KPI fields (determined by user's team/role)",
+        "Manager dashboard: TeamActivityOverview, PendingReviewsList, UnderperformersTable",
+        "Manager review flow: approve/reject/comment on submissions",
+        "Founder dashboard: KpiSummaryGrid (4 cards), ConversionFunnel, WeeklyTrends, LeaderboardPreview, AiInsightsPanel",
+        "KPI management: CRUD with dynamic KPI builder (name, metric_type, weightage, scoring_logic)",
+        "Target management: daily/weekly/monthly targets per user/team/department",
+        "Department management: CRUD",
+        "Team management: CRUD with member assignment"
+      ]
+    },
+    "phase_3_engagement": {
+      "hours": "11-14",
+      "tasks": [
+        "Leaderboard: daily/weekly/monthly tabs, filters by team, user rank card",
+        "Gamification: XP points on submission (+50), streaks tracking, achievement badges",
+        "Notification system: in-app dropdown + full page, email via SendGrid",
+        "WebSocket integration: live dashboard updates, real-time notifications",
+        "Reports: generate PDF/Excel/CSV, list with download, schedule auto-reports",
+        "User management: employees table (virtualized, sortable, filterable), bulk invite"
+      ]
+    },
+    "phase_4_polish": {
+      "hours": "15-16",
+      "tasks": [
+        "AI Insights panel: trend analysis cards, burnout detection, revenue forecasting (mock LLM)",
+        "Activity monitoring: login history, submission consistency, attendance patterns",
+        "Settings page: org branding (logo, colors), profile settings, notification preferences",
+        "Subscription management (Stripe placeholder)",
+        "Testing: unit tests for components, integration tests for forms, e2e for critical flows",
+        "Build verification: npm run build passes, bundle size within budget, Lighthouse >= 90"
+      ]
+    }
+  },
+
+  "pages": {
+    "auth": [
+      "/(auth)/login/page.tsx — email + password form, role-based redirect on success",
+      "/(auth)/register/page.tsx — org signup: name, email, password, company name, team size",
+      "/(auth)/forgot-password/page.tsx — email input, sends reset link",
+      "/(auth)/layout.tsx — centered card on dark gradient bg (surface-primary to surface-secondary)"
+    ],
+    "employee": [
+      "/(dashboard)/employee/page.tsx — daily targets, submission form, performance summary, your rank",
+      "/(dashboard)/employee/submit/page.tsx — alternative full-screen submission form",
+      "/(dashboard)/employee/profile/page.tsx — edit name, email, phone, avatar"
+    ],
+    "manager": [
+      "/(dashboard)/manager/page.tsx — team activity overview, pending reviews, underperformers, target progress",
+      "/(dashboard)/manager/team/[id]/page.tsx — team detail: member list with KPI progress",
+      "/(dashboard)/manager/review/[id]/page.tsx — approve/reject submission with notes"
+    ],
+    "founder_admin": [
+      "/(dashboard)/founder/page.tsx — KPI summary (4 cards), conversion funnel, weekly trends, AI insights, top 5 leaderboard",
+      "/(dashboard)/founder/employees/page.tsx — virtualized table, filters by dept/team/status, bulk invite",
+      "/(dashboard)/founder/employees/[id]/page.tsx — employee detail + edit form",
+      "/(dashboard)/founder/departments/page.tsx — CRUD table",
+      "/(dashboard)/founder/teams/page.tsx — CRUD with member selector",
+      "/(dashboard)/founder/kpis/page.tsx — dynamic KPI builder (name, type, weight, scoring logic)",
+      "/(dashboard)/founder/targets/page.tsx — bulk target editor (per period, per user/team)",
+      "/(dashboard)/founder/leaderboard/page.tsx — full leaderboard with tabs and filters",
+      "/(dashboard)/founder/reports/page.tsx — generate, list, download reports",
+      "/(dashboard)/founder/settings/page.tsx — org branding (logo, colors), subscription plan",
+      "/(dashboard)/founder/analytics/page.tsx — full analytics with all charts",
+      "/(dashboard)/super-admin/organizations/page.tsx — manage all organizations (super admin only)"
+    ],
+    "shared_layout": [
+      "/(dashboard)/layout.tsx — sidebar + top navbar, auth check, Suspense boundaries",
+      "/layout.tsx — root: font loading, ThemeProvider, QueryClientProvider, SessionProvider",
+      "/globals.css — Tailwind directives + design tokens",
+      "/error.tsx — global error boundary with retry",
+      "/middleware.ts — auth check + role-based route gating"
+    ]
+  },
+
+  "database_schema": {
+    "tables": [
+      {
+        "name": "organizations",
+        "fields": [
+          "id (UUID, PK)", "name (VARCHAR 255)", "slug (UNIQUE VARCHAR 255)", "logo_url (TEXT?)",
+          "settings (JSONB, default {})", "colors (JSONB, default {})", "is_active (BOOLEAN, default true)",
+          "created_at, updated_at (TIMESTAMPTZ)"
+        ],
+        "relations": ["users[]", "departments[]", "teams[]", "kpis[]", "targets[]", "performance_entries[]", "notifications[]", "leaderboards[]", "activities[]", "reports[]", "notes[]", "attachments[]"]
+      },
+      {
+        "name": "users",
+        "fields": [
+          "id (UUID, PK)", "org_id (FK)", "first_name (VARCHAR 100)", "last_name (VARCHAR 100)",
+          "email (UNIQUE VARCHAR 255)", "password_hash (VARCHAR 255)", "phone (VARCHAR 20?)",
+          "designation (VARCHAR 200?)", "department_id (FK?)", "manager_id (FK, self-ref?)",
+          "role_id (FK)", "branch (VARCHAR 200?)", "joining_date (DATE)", "employment_status (VARCHAR 20, default 'active')",
+          "profile_image_url (TEXT?)", "is_active (BOOLEAN, default true)"
+        ],
+        "indexes": ["idx_users_org(org_id)", "idx_users_email(email)", "idx_users_dept(department_id)", "idx_users_mgr(manager_id)"]
+      },
+      {
+        "name": "departments",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "name (VARCHAR 200)", "head_id (FK, users?)", "description (TEXT?)"],
+        "unique": ["name, org_id"]
+      },
+      {
+        "name": "teams",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "name (VARCHAR 200)", "department_id (FK?)", "lead_id (FK, users?)"],
+        "relations": ["members (UserTeam[])", "kpis[]", "targets[]"]
+      },
+      {
+        "name": "user_teams",
+        "fields": ["user_id (FK, composite PK)", "team_id (FK, composite PK)", "joined_at (TIMESTAMPTZ)"]
+      },
+      {
+        "name": "roles",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "name (VARCHAR 100)", "description (TEXT?)", "permissions (JSONB)", "is_system (BOOLEAN, default false)"]
+      },
+      {
+        "name": "kpis",
+        "fields": [
+          "id (UUID, PK)", "org_id (FK)", "department_id (FK?)", "team_id (FK?)",
+          "name (VARCHAR 200)", "metric_type (VARCHAR 50: number|percentage|boolean|currency)",
+          "description (TEXT?)", "target_value (DECIMAL 10,2?)", "unit (VARCHAR 50?)",
+          "weightage (INT, default 1)", "scoring_logic (JSONB?)", "is_active (BOOLEAN, default true)"
+        ]
+      },
+      {
+        "name": "targets",
+        "fields": [
+          "id (UUID, PK)", "org_id (FK)", "kpi_id (FK)", "user_id (FK?)", "department_id (FK?)",
+          "value (DECIMAL 10,2)", "period (VARCHAR 20: daily|weekly|monthly|quarterly)",
+          "start_date (DATE)", "end_date (DATE)"
+        ]
+      },
+      {
+        "name": "performance_entries",
+        "fields": [
+          "id (UUID, PK)", "org_id (FK)", "user_id (FK)", "kpi_id (FK?)",
+          "submitted_value (DECIMAL 10,2)", "notes (TEXT?)", "attachments (JSONB?)",
+          "submission_date (DATE)", "status (VARCHAR 20: pending|approved|rejected)",
+          "reviewed_by (FK, users?)", "review_notes (TEXT?)"
+        ],
+        "indexes": ["idx_perf_user_date(user_id, submission_date)", "idx_perf_status(status)", "unique(user_id, submission_date, kpi_id)"]
+      },
+      {
+        "name": "leaderboards",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "period (VARCHAR 20: daily|weekly|monthly)", "user_id (FK)", "rank (INT)", "score (DECIMAL 10,2)", "kpi_breakdown (JSONB?)", "week_start (DATE?)"]
+      },
+      {
+        "name": "notifications",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "user_id (FK)", "type (VARCHAR 50)", "title (VARCHAR 200)", "message (TEXT)", "data (JSONB?)", "channel (VARCHAR 20: in_app)", "is_read (BOOLEAN)", "sent_at (TIMESTAMPTZ)"]
+      },
+      {
+        "name": "reports",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "user_id (FK)", "type (VARCHAR 20)", "format (VARCHAR 10: pdf|excel|csv)", "title (VARCHAR 255)", "filters (JSONB?)", "file_url (TEXT?)", "status (VARCHAR 20: pending|generating|completed|failed)", "generated_at (TIMESTAMPTZ?)"]
+      },
+      {
+        "name": "notes",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "user_id (FK)", "type (VARCHAR 50: daily_summary|blocker|comment)", "content (TEXT)", "visibility (VARCHAR 20: personal|team|department|organization)"]
+      },
+      {
+        "name": "activities",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "user_id (FK)", "action (VARCHAR 100)", "entity_type (VARCHAR 50?)", "entity_id (UUID?)", "ip_address (VARCHAR 45?)", "user_agent (TEXT?)"]
+      },
+      {
+        "name": "attachments",
+        "fields": ["id (UUID, PK)", "org_id (FK)", "user_id (FK)", "file_url (TEXT)", "file_name (VARCHAR 255)", "file_type (VARCHAR 50)", "file_size (BIGINT)", "entity_type (VARCHAR 50?)", "entity_id (UUID?)"]
+      }
+    ]
+  },
+
+  "api_endpoints": {
+    "base": "/api/v1",
+    "format": {
+      "response": "{ success: boolean, data: T, message?: string, meta?: { page, limit, total, hasMore } }",
+      "error": "{ success: false, message: string, errorCode: string, details?: Record<string, string[]> }"
+    },
+    "groups": {
+      "auth": {
+        "POST /auth/login": "{ email, password } -> { accessToken, refreshToken, user }",
+        "POST /auth/register": "{ name, email, password, companyName } -> { user }",
+        "POST /auth/logout": "invalidate refresh token",
+        "POST /auth/refresh-token": "-> { accessToken }",
+        "POST /auth/forgot-password": "{ email } -> send reset link",
+        "POST /auth/reset-password": "{ token, password } -> success"
+      },
+      "organizations": {
+        "GET /organizations": "list (super admin only, paginated)",
+        "POST /organizations": "create org",
+        "GET /organizations/:id": "org details with settings",
+        "PUT /organizations/:id": "update branding (logo, colors)",
+        "DELETE /organizations/:id": "soft delete"
+      },
+      "users": {
+        "GET /users": "list (paginated, filterable by dept/team/status/role)",
+        "POST /users": "create (admin invite)",
+        "POST /users/bulk-invite": "CSV/email bulk invite",
+        "GET /users/:id": "profile with department, team, role, manager",
+        "PUT /users/:id": "update fields",
+        "DELETE /users/:id": "deactivate"
+      },
+      "departments_teams": {
+        "GET /departments": "list per org",
+        "POST /departments": "create", "PUT /departments/:id": "update", "DELETE /departments/:id": "delete",
+        "GET /teams": "list per org",
+        "POST /teams": "create with member assignment",
+        "PUT /teams/:id": "update", "DELETE /teams/:id": "delete"
+      },
+      "kpis_targets": {
+        "GET /kpis": "list (filter by dept/team)",
+        "POST /kpis": "create (dynamic builder)",
+        "PUT /kpis/:id": "update (metric_type, weightage, scoring_logic)",
+        "DELETE /kpis/:id": "soft delete",
+        "GET /targets": "list (filter by user/period)",
+        "POST /targets": "create", "PUT /targets/:id": "update", "DELETE /targets/:id": "delete"
+      },
+      "performance": {
+        "POST /performance-entries": "submit daily values",
+        "GET /performance-entries": "list (filter by user/date/status)",
+        "PUT /performance-entries/:id/review": "approve|reject + review_notes",
+        "GET /performance-entries/summary": "aggregated per user (current vs target, trend)",
+        "GET /performance-entries/team": "team-level aggregation for manager"
+      },
+      "analytics": {
+        "GET /analytics/kpi-summary": "4 cards: total_revenue, total_leads, active_employees, avg_productivity",
+        "GET /analytics/conversion-funnel": "calls -> leads -> meetings -> closures -> revenue",
+        "GET /analytics/weekly-trends": "7-day line chart data per KPI",
+        "GET /analytics/department-comparison": "bar chart comparing departments",
+        "GET /analytics/revenue": "revenue over time (daily/weekly/monthly)"
+      },
+      "leaderboard": {
+        "GET /leaderboard": "?period=daily|weekly|monthly&limit=10&team_id=",
+        "GET /leaderboard/user/:id": "specific user rank and score"
+      },
+      "reports": {
+        "GET /reports": "list generated reports",
+        "POST /reports/generate": "{ type, format, filters } -> { reportId }",
+        "GET /reports/:id/download": "download file (content-disposition)",
+        "GET /reports/schedule": "list scheduled auto-reports",
+        "POST /reports/schedule": "schedule recurring report"
+      },
+      "notifications": {
+        "GET /notifications": "paginated, newest first, unread count in header",
+        "PATCH /notifications/:id/read": "mark single as read",
+        "PATCH /notifications/read-all": "mark all as read"
+      },
+      "insights": {
+        "GET /insights": "trends, burnouts, forecasts, summaries (cached 1 hour)",
+        "GET /insights/summary": "weekly AI digest text"
+      }
+    }
+  },
+
+  "design_tokens": {
+    "colors": {
+      "surface_primary": "#0F172A",
+      "surface_secondary": "#1E293B",
+      "surface_tertiary": "#334155",
+      "text_primary": "#F1F5F9",
+      "text_secondary": "#94A3B8",
+      "text_muted": "#64748B",
+      "accent_action": "#F59E0B",
+      "accent_success": "#10B981",
+      "accent_danger": "#EF4444",
+      "light_mode": {
+        "surface_primary": "#F8FAFC",
+        "surface_secondary": "#FFFFFF",
+        "surface_tertiary": "#E2E8F0",
+        "text_primary": "#0F172A",
+        "text_secondary": "#475569",
+        "text_muted": "#94A3B8",
+        "border_default": "#E2E8F0"
+      }
+    },
+    "typography": {
+      "font_display": ["Manrope", "Inter", "system-ui", "sans-serif"],
+      "font_body": ["Inter", "system-ui", "sans-serif"],
+      "font_mono": ["JetBrains Mono", "Cascadia Code", "Fira Code", "monospace"],
+      "scale": {
+        "hero": "clamp(1.75rem, 2.5vw, 2rem)",
+        "heading": "clamp(1.125rem, 1.5vw, 1.25rem)",
+        "body": "clamp(0.875rem, 1vw, 1rem)",
+        "small": "0.875rem",
+        "caption": "0.75rem",
+        "data": "clamp(1.25rem, 2vw, 1.5rem)"
+      }
+    },
+    "spacing": {
+      "xs": "0.25rem",
+      "sm": "0.5rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2rem"
+    },
+    "border_radius": {
+      "sm": "0.375rem",
+      "md": "0.5rem",
+      "lg": "0.75rem"
+    },
+    "shadows": {
+      "modal": "0 4px 24px rgba(0,0,0,0.3)"
+    }
+  },
+
+  "component_specs": {
+    "kpi_card": {
+      "props": "title (string), icon (string), current (number), target (number), trend (up|down|flat), trendValue (string), unit (string?)",
+      "states": {
+        "loading": "Skeleton h-24 rounded-md",
+        "empty": "Icon + label + '-- / --' + 'No data for today'",
+        "normal": "Icon + label + '30 / 50' + progress bar (color by pct: >=80% green, 50-79% amber, <50% red) + trend indicator (green up / red down / gray flat)",
+        "error": "Retry button"
+      },
+      "behavior": "Re-fetches every 60s via React Query refetchInterval. Progress bar: CSS transition width 500ms."
+    },
+    "submission_form": {
+      "states": {
+        "loading": "4 skeleton input fields",
+        "empty": "No KPIs configured. Ask your manager.",
+        "form": "Dynamic input fields based on user's team KPIs, validation (min 0, max 100000, required if active), notes textarea (max 500 chars), file upload (max 5MB)",
+        "submitting": "Button spinner + all fields disabled",
+        "success": "Green toast 'Submitted! Streak: X days' + clear form",
+        "error": "Red toast + inline field errors + auto-save draft to localStorage",
+        "offline": "Yellow banner 'Saving draft...' + queue submission, retry on reconnect"
+      },
+      "behavior": "Auto-saves draft to localStorage every 30s. Optimistic update via React Query mutation."
+    },
+    "data_table": {
+      "props": "columns (ColumnDef[]), data (Row[]), totalRows (number), pageSize (default 25), onSort, onFilter, onRowClick",
+      "states": {
+        "loading": "5 skeleton rows matching column widths",
+        "empty": "Centered 'No data' + CTA (or 'Clear filters' button)",
+        "error": "Error message + Retry button",
+        "normal": "Virtualized rows (render 25 + overscan 5)"
+      },
+      "performance": "Server-side sorting and filtering. Debounced 300ms. No row animations. Fixed-width columns where possible."
+    },
+    "conversion_funnel": {
+      "props": "data: Array<{ label, value, percentage }>",
+      "states": { "loading": "Skeleton h-80", "empty": "Start tracking to see your funnel", "normal": "Recharts Funnel chart", "error": "Could not load funnel data" },
+      "performance": "Lazy loaded (next/dynamic). Only import Funnel + ResponsiveContainer from Recharts."
+    },
+    "ai_insights_panel": {
+      "states": { "loading": "3 skeleton cards", "empty": "AI analysis runs nightly. Check back tomorrow.", "normal": "Cards with natural language insight text", "error": "AI service unavailable (non-blocking)" },
+      "performance": "Lazy loaded. Data cached 1 hour. Plain text cards only — no markdown renderer."
+    }
+  },
+
+  "state_management": {
+    "server_data": "TanStack Query (staleTime: 60s for dashboards, gcTime: 5min)",
+    "auth": "NextAuth.js session (httpOnly cookies)",
+    "forms": "React Hook Form + Zod (minimal re-renders via register/watcher)",
+    "ui_state": "Zustand for theme and sidebar (persisted to localStorage)",
+    "url_state": "useSearchParams for filters and pagination (shareable URLs)",
+    "real_time": "WebSocket via NestJS Gateway (subscribe to org:${orgId} and user:${userId} rooms)"
+  },
+
+  "performance_rules": [
+    "All charts lazy loaded via next/dynamic with ssr: false",
+    "Tables with >100 rows use virtualization (tanstack-virtual)",
+    "No Framer Motion or animation libraries — CSS transitions only (transform + opacity)",
+    "Fonts self-hosted with font-display: swap — zero CLS",
+    "Images use next/image with remotePatterns config",
+    "API calls through React Query with staleTime >= 30s for dashboard data",
+    "Optimistic updates on all form submissions",
+    "Suspense boundaries around every data-fetching component",
+    "Prefer Server Components — only add 'use client' when interactivity is needed",
+    "CSS containment (contain: content) on dashboard widgets",
+    "All animations respect prefers-reduced-motion: reduce (disable entirely)"
+  ],
+
+  "component_guidelines": {
+    "every_component_must_have": ["loading state (skeleton)", "empty state (illustration + CTA)", "error state (message + retry)", "normal state (real data, no mount animations)"],
+    "accessibility": ["WCAG 2.1 AA minimum", "Focus-visible ring on all interactive elements", "Color not used alone to convey info (add icons/badges)", "Skip to content link", "All forms: label + error via aria-describedby", "Modals: focus trap + escape to close + aria-modal"],
+    "shadcn_imports_only": ["Button, Card, Input, Select, Dialog, DropdownMenu, Table, Tabs, Badge, Avatar, Skeleton, Toast, Tooltip"],
+    "do_not_import": ["Carousel, Calendar, Form (use react-hook-form), Charts (use Recharts), Sonner"]
+  },
+
+  "middleware_rules": {
+    "/login": "public",
+    "/register": "public",
+    "/forgot-password": "public",
+    "/employee/*": "roles: employee, manager, founder, super_admin",
+    "/manager/*": "roles: manager, founder, super_admin",
+    "/founder/*": "roles: founder, super_admin",
+    "/super-admin/*": "roles: super_admin only"
+  },
+
+  "deployment": {
+    "frontend": "Vercel (production) + Vercel Preview (staging)",
+    "backend": "AWS ECS Fargate (production) / Docker Compose (local dev)",
+    "ci_cd": "GitHub Actions: lint -> typecheck -> test -> build -> deploy",
+    "environments": {
+      "local": "Docker Compose (postgres:16 + redis:7 + nestjs:dev + nextjs:dev)",
+      "staging": "Vercel + ECS",
+      "production": "Vercel + ECS + RDS"
+    }
+  },
+
+  "build_verification": [
+    "npm run build passes with zero errors",
+    "npm run lint passes (strict ESLint config)",
+    "npm run typecheck passes (tsc --noEmit)",
+    "Bundle analyzer shows initial JS <= 150KB",
+    "Lighthouse score >= 90 for Performance, Accessibility, Best Practices",
+    "All pages render: loading -> empty -> error states tested",
+    "Auth flow: login -> redirect -> session persist -> logout tested"
+  ],
+
+  "folder_structure": {
+    "src/app/(auth)": "login, register, forgot-password pages",
+    "src/app/(dashboard)": "employee, manager, founder, super-admin subdirectories",
+    "src/app/(dashboard)/employee/_components": "DailyTargetsCard, SubmissionForm, PerformanceSummary, YourRank",
+    "src/app/(dashboard)/manager/_components": "TeamActivityOverview, PendingReviewsList, UnderperformersTable",
+    "src/app/(dashboard)/founder/_components": "KpiSummaryGrid, ConversionFunnel, WeeklyTrends, LeaderboardPreview, AiInsightsPanel",
+    "src/components/ui": "ShadCN components (customized variants)",
+    "src/components/common": "KpiCard, DataTable, KpiProgress, UserAvatar, NotificationBell",
+    "src/hooks": "useWebSocket, useOptimisticSubmit, useDebounce, useMediaQuery",
+    "src/lib": "api-client, auth, utils, constants",
+    "src/stores": "useThemeStore, useSidebarStore (Zustand)",
+    "src/types": "index.ts (all shared TypeScript types)",
+    "public/fonts": "Inter, JetBrains Mono, Manrope woff2 files",
+    "e2e": "Playwright tests"
+  }
+}

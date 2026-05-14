@@ -1,0 +1,322 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  logoUrl     String?
+  settings    Json?
+  colors      Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users              User[]
+  departments        Department[]
+  teams              Team[]
+  kpis               Kpi[]
+  targets            Target[]
+  performanceEntries PerformanceEntry[]
+  notifications      Notification[]
+  leaderboards       Leaderboard[]
+  activities         Activity[]
+  reports            Report[]
+  notes              Note[]
+  attachments        Attachment[]
+
+  @@map("organizations")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  orgId            String
+  firstName        String
+  lastName         String
+  email            String   @unique
+  passwordHash     String
+  phone            String?
+  designation      String?
+  departmentId     String?
+  managerId        String?
+  roleId           String
+  branch           String?
+  joiningDate      DateTime
+  employmentStatus String   @default("active")
+  profileImageUrl  String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization   Organization @relation(fields: [orgId], references: [id])
+  department     Department?  @relation(fields: [departmentId], references: [id])
+  manager        User?        @relation("UserManager", fields: [managerId], references: [id])
+  subordinates   User[]       @relation("UserManager")
+  role           Role         @relation(fields: [roleId], references: [id])
+  teams          UserTeam[]
+  
+  performanceEntries PerformanceEntry[]
+  notifications      Notification[]
+  leaderboards       Leaderboard[]
+  activities         Activity[]
+  reports            Report[]
+  notes              Note[]
+  attachments        Attachment[]
+  targets            Target[]
+  reviewedEntries    PerformanceEntry[] @relation("ReviewedBy")
+  leadTeams          Team[]             @relation("TeamLead")
+  headDepartments    Department[]       @relation("DepartmentHead")
+
+  @@index([orgId])
+  @@index([email])
+  @@index([departmentId])
+  @@index([managerId])
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  orgId       String
+  name        String
+  headId      String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  head         User?        @relation("DepartmentHead", fields: [headId], references: [id])
+  users        User[]
+  teams        Team[]
+  kpis         Kpi[]
+  targets      Target[]
+
+  @@unique([name, orgId])
+  @@map("departments")
+}
+
+model Team {
+  id           String   @id @default(uuid())
+  orgId        String
+  name         String
+  departmentId String?
+  leadId       String?
+  createdAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  lead         User?        @relation("TeamLead", fields: [leadId], references: [id])
+  members      UserTeam[]
+  kpis         Kpi[]
+  targets      Target[]
+
+  @@map("teams")
+}
+
+model UserTeam {
+  userId   String
+  teamId   String
+  joinedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+
+  @@id([userId, teamId])
+  @@map("user_teams")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  orgId       String?
+  name        String
+  description String?
+  permissions Json
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  users User[]
+
+  @@map("roles")
+}
+
+model Kpi {
+  id           String   @id @default(uuid())
+  orgId        String
+  departmentId String?
+  teamId       String?
+  name         String   @default("New KPI")
+  metricType   String   @default("number")
+  description  String?
+  targetValue  Float?
+  unit         String?  @default("count")
+  weightage    Int      @default(1)
+  scoringLogic Json?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organization Organization      @relation(fields: [orgId], references: [id])
+  department   Department?       @relation(fields: [departmentId], references: [id])
+  team         Team?             @relation(fields: [teamId], references: [id])
+  targets      Target[]
+  entries      PerformanceEntry[]
+
+  @@map("kpis")
+}
+
+model Target {
+  id           String   @id @default(uuid())
+  orgId        String
+  kpiId        String
+  userId       String?
+  departmentId String?
+  teamId       String?
+  value        Float
+  period       String
+  startDate    DateTime
+  endDate      DateTime
+  createdAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  kpi          Kpi          @relation(fields: [kpiId], references: [id])
+  user         User?        @relation(fields: [userId], references: [id])
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  team         Team?        @relation(fields: [teamId], references: [id])
+
+  @@map("targets")
+}
+
+model PerformanceEntry {
+  id             String   @id @default(uuid())
+  orgId          String
+  userId         String
+  kpiId          String?
+  submittedValue Float
+  notes          String?
+  attachments    Json?
+  submissionDate DateTime
+  status         String   @default("pending")
+  reviewedBy     String?
+  reviewNotes    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  kpi          Kpi?         @relation(fields: [kpiId], references: [id])
+  reviewer     User?        @relation("ReviewedBy", fields: [reviewedBy], references: [id])
+
+  @@index([userId, submissionDate])
+  @@index([status])
+  @@unique([userId, submissionDate, kpiId])
+  @@map("performance_entries")
+}
+
+model Leaderboard {
+  id           String   @id @default(uuid())
+  orgId        String
+  period       String
+  userId       String
+  rank         Int
+  score        Float
+  kpiBreakdown Json?
+  weekStart    DateTime?
+  createdAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([orgId, period, userId, weekStart])
+  @@map("leaderboards")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  orgId     String
+  userId    String
+  type      String
+  title     String
+  message   String
+  data      Json?
+  channel   String   @default("in_app")
+  isRead    Boolean  @default(false)
+  sentAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model Report {
+  id          String    @id @default(uuid())
+  orgId       String
+  userId      String
+  type        String
+  format      String
+  title       String
+  filters     Json?
+  fileUrl     String?
+  status      String    @default("pending")
+  generatedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("reports")
+}
+
+model Note {
+  id         String   @id @default(uuid())
+  orgId      String
+  userId     String
+  type       String
+  content    String
+  visibility String   @default("team")
+  createdAt  DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("notes")
+}
+
+model Activity {
+  id         String   @id @default(uuid())
+  orgId      String
+  userId     String
+  action     String
+  entityType String?
+  entityId   String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("activities")
+}
+
+model Attachment {
+  id         String   @id @default(uuid())
+  orgId      String
+  userId     String
+  fileUrl    String
+  fileName   String
+  fileType   String
+  fileSize   BigInt
+  entityType String?
+  entityId   String?
+  createdAt  DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("attachments")
+}
