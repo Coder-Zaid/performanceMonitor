@@ -96,8 +96,9 @@ performance-management-system/
 │       │   ├── layout/     # Navbar, Sidebar
 │       │   └── ui/         # shadcn/ui components
 │       └── lib/            # Utilities, API client
+├── docs/                   # Project documentation
+│   └── DEVELOPMENT.md      # Consolidated technical & design spec
 ├── e2e/                    # Playwright tests
-└── docs/design/spec.md      # Design system spec
 ```
 
 ## Features
@@ -112,4 +113,4 @@ performance-management-system/
 
 ## Design System
 
-Inspired by high-performance geometric aesthetics — true black (`#000000`) canvas, gold accents, and dramatic typography. Full spec in [`docs/design/spec.md`](./docs/design/spec.md).
+Inspired by high-performance geometric aesthetics — true black (`#000000`) canvas, gold accents, and dramatic typography. Full spec in [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md).
