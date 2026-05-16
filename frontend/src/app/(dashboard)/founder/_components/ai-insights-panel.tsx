@@ -22,28 +22,28 @@ export function AIInsightsPanel() {
   ];
 
   return (
-    <Card className="border-border bg-gradient-to-br from-surface-primary to-surface-secondary overflow-hidden">
+    <Card className="border-border bg-card overflow-hidden">
       <CardHeader className="flex flex-row items-center gap-2">
-        <Sparkles className="h-5 w-5 text-accent-amber animate-pulse" />
-        <CardTitle>AI Performance Insights</CardTitle>
+        <Sparkles className="h-5 w-5 text-[#FFC000] animate-pulse" />
+        <CardTitle className="font-display text-2xl tracking-widest text-white leading-tight">AI Performance Insights</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {insights.map((insight, i) => (
-          <div key={i} className="p-4 rounded-lg bg-surface-tertiary border border-border/50 space-y-2 group hover:border-accent-action/30 transition-colors">
+          <div key={i} className="p-4 bg-[#181818] border border-border/50 space-y-2 group hover:border-[#FFC000]/30 transition-colors">
             <div className="flex justify-between items-center">
-              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                insight.impact === 'Critical' ? 'bg-accent-error/20 text-accent-error' :
-                insight.impact === 'High' ? 'bg-accent-success/20 text-accent-success' :
-                'bg-accent-action/20 text-accent-action'
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border ${
+                insight.impact === 'Critical' ? 'border-[#FFC000] text-[#FFC000]' :
+                insight.impact === 'High' ? 'border-white text-white' :
+                'border-[#7D7D7D] text-[#7D7D7D]'
               }`}>
                 {insight.impact} Impact
               </span>
             </div>
-            <h4 className="text-sm font-semibold text-text-primary">{insight.title}</h4>
-            <p className="text-xs text-text-muted leading-relaxed">{insight.description}</p>
+            <h4 className="text-sm font-bold uppercase text-white">{insight.title}</h4>
+            <p className="text-xs text-[#7D7D7D] leading-relaxed">{insight.description}</p>
           </div>
         ))}
-        <Button variant="ghost" className="w-full text-xs text-accent-action hover:bg-accent-action/10 group">
+        <Button variant="ghost" className="w-full text-xs text-[#FFC000] hover:bg-[#FFC000]/10 group">
           View Detailed AI Audit <ArrowRight className="h-3 w-3 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
       </CardContent>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { useAuth } from "@clerk/nextjs";
+import { useApiClient } from "@/lib/api-client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,9 +17,13 @@ interface TargetProgress {
 }
 
 export function DailyTargetsCard() {
+  const { getApiClient } = useApiClient();
+  const { isLoaded, isSignedIn } = useAuth();
+  
   const { data: progress, isLoading, isError } = useQuery<TargetProgress[]>({
     queryKey: ["daily-targets"],
-    queryFn: () => apiClient.get("/performance-entries/summary"),
+    queryFn: () => getApiClient().get("/performance-entries/summary"),
+    enabled: isLoaded && !!isSignedIn,
     // In a real app, this would be an array of KPI progress objects
   });
 

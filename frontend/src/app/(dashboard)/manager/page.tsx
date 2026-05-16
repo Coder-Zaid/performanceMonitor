@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { useApiClient } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -36,15 +36,16 @@ interface PendingEntry {
 export default function ManagerDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { getApiClient } = useApiClient();
 
   const { data: pending, isLoading } = useQuery<PendingEntry[]>({
     queryKey: ["pending-reviews"],
-    queryFn: () => apiClient.get("/performance-entries/pending"),
+    queryFn: () => getApiClient().get("/performance-entries/pending"),
   });
 
   const reviewMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: "approved" | "rejected" }) =>
-      apiClient.post(`/performance-entries/${id}/review`, { status }),
+      getApiClient().post(`/performance-entries/${id}/review`, { status }),
     onSuccess: () => {
       toast({ title: "Updated", description: "Entry status updated successfully." });
       queryClient.invalidateQueries({ queryKey: ["pending-reviews"] });

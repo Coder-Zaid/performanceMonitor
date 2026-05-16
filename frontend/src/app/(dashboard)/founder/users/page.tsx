@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { useApiClient } from "@/lib/api-client";
 import {
   Table,
   TableBody,
@@ -34,9 +34,10 @@ interface User {
 }
 
 export default function UsersPage() {
+  const { getApiClient } = useApiClient();
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ["org-users"],
-    queryFn: () => apiClient.get("/users"),
+    queryFn: () => getApiClient().get("/users"),
   });
 
   return (
@@ -100,10 +101,8 @@ export default function UsersPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                      <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-white/5 h-9 w-9 text-[#7D7D7D] hover:text-white">
+                        <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>Edit Profile</DropdownMenuItem>

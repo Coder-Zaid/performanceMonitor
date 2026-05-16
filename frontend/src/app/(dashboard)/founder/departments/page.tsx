@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@clerk/nextjs";
+import { useApiClient } from "@/lib/api-client";
 import { 
   Building2, 
   Plus, 
@@ -33,24 +34,22 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DepartmentsPage() {
-  const { data: session } = useSession();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { getApiClient } = useApiClient();
   const { toast } = useToast();
   const [departments, setDepartments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetchDepartments();
-  }, []);
+    if (isLoaded && isSignedIn) {
+      fetchDepartments();
+    }
+  }, [isLoaded, isSignedIn]);
 
   const fetchDepartments = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments`, {
-        headers: {
-          Authorization: `Bearer ${(session as any)?.accessToken}`,
-        },
-      });
-      const data = await res.json();
+      const data = await getApiClient().get<any[]>('/departments');
       if (Array.isArray(data)) {
         setDepartments(data);
       } else {
@@ -73,45 +72,45 @@ export default function DepartmentsPage() {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-text-primary">Departments</h1>
-          <p className="text-text-secondary">
-            Manage your organization's structural units and heads.
+    <div className="space-y-12 bg-background min-h-screen">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between px-2">
+        <div className="space-y-2">
+          <h1 className="text-display-hero text-white">Departments</h1>
+          <p className="text-sm tracking-[0.2em] uppercase text-[#7D7D7D]">
+            Structural units and executive oversight.
           </p>
         </div>
-        <Button className="bg-accent-action hover:bg-accent-action/90 text-white">
-          <Plus className="mr-2 h-4 w-4" /> Add Department
+        <Button className="bg-[#FFC000] hover:bg-[#917300] text-black font-bold uppercase tracking-wider h-12 px-8">
+          <Plus className="mr-2 h-4 w-4" /> Add Unit
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-8 md:grid-cols-3">
         <StatCard 
-          title="Total Departments" 
+          title="Total Units" 
           value={departments.length.toString()} 
           icon={<Building2 className="h-4 w-4" />} 
         />
         <StatCard 
-          title="Total Teams" 
+          title="Active Teams" 
           value={departments.reduce((acc, d) => acc + (d._count?.teams || 0), 0).toString()} 
           icon={<Network className="h-4 w-4" />} 
         />
         <StatCard 
-          title="Total Staff" 
+          title="Org Staff" 
           value={departments.reduce((acc, d) => acc + (d._count?.users || 0), 0).toString()} 
           icon={<Users className="h-4 w-4" />} 
         />
       </div>
 
       <Card className="border-border bg-card">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-lg font-semibold">All Departments</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+          <CardTitle className="text-sm font-bold uppercase tracking-[0.2em] text-white/60">Organization Structure</CardTitle>
           <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7D7D7D]" />
             <Input
-              placeholder="Search departments..."
-              className="pl-10"
+              placeholder="SEARCH UNITS..."
+              className="pl-10 bg-[#181818] border-border text-white text-[10px] tracking-widest font-bold uppercase"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -120,53 +119,51 @@ export default function DepartmentsPage() {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Department Name</TableHead>
-                <TableHead>Head of Dept</TableHead>
-                <TableHead className="text-center">Teams</TableHead>
-                <TableHead className="text-center">Employees</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="border-b border-[#181818] hover:bg-transparent">
+                <TableHead className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7D7D7D]">Unit Name</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7D7D7D]">Executive Head</TableHead>
+                <TableHead className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-[#7D7D7D]">Teams</TableHead>
+                <TableHead className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-[#7D7D7D]">Staff</TableHead>
+                <TableHead className="text-right text-[10px] font-bold uppercase tracking-[0.2em] text-[#7D7D7D]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-40" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-10 mx-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-10 mx-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-8 ml-auto" /></TableCell>
+                  <TableRow key={i} className="border-b border-[#181818]">
+                    <TableCell><Skeleton className="h-5 w-32 bg-[#181818]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-40 bg-[#181818]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-10 mx-auto bg-[#181818]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-10 mx-auto bg-[#181818]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-8 ml-auto bg-[#181818]" /></TableCell>
                   </TableRow>
                 ))
               ) : filteredDepartments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-text-muted">
-                    No departments found.
+                  <TableCell colSpan={5} className="h-48 text-center text-[#7D7D7D] uppercase tracking-widest text-[10px]">
+                    No units found in the abyss.
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredDepartments.map((dept) => (
-                  <TableRow key={dept.id}>
-                    <TableCell className="font-medium text-text-primary">{dept.name}</TableCell>
-                    <TableCell className="text-text-secondary">
-                      {dept.head ? `${dept.head.firstName} ${dept.head.lastName}` : "Not assigned"}
+                  <TableRow key={dept.id} className="border-b border-[#181818] hover:bg-white/5 transition-colors">
+                    <TableCell className="font-bold uppercase tracking-tight text-white">{dept.name}</TableCell>
+                    <TableCell className="text-[#7D7D7D] uppercase text-[10px] tracking-wider">
+                      {dept.head ? `${dept.head.firstName} ${dept.head.lastName}` : "UNASSIGNED"}
                     </TableCell>
-                    <TableCell className="text-center text-text-secondary">{dept._count?.teams || 0}</TableCell>
-                    <TableCell className="text-center text-text-secondary">{dept._count?.users || 0}</TableCell>
+                    <TableCell className="text-center text-[#FFC000] font-bold">{dept._count?.teams || 0}</TableCell>
+                    <TableCell className="text-center text-white font-bold">{dept._count?.users || 0}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-white/5 h-9 w-9 text-[#7D7D7D] hover:text-white">
+                          <MoreVertical className="h-4 w-4" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="cursor-pointer">
-                            <Edit2 className="mr-2 h-4 w-4" /> Edit
+                        <DropdownMenuContent align="end" className="bg-[#181818] border-border text-white">
+                          <DropdownMenuItem className="cursor-pointer uppercase text-[10px] font-bold tracking-widest">
+                            <Edit2 className="mr-2 h-4 w-4" /> Modify
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-accent-error focus:text-accent-error">
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          <DropdownMenuItem className="cursor-pointer uppercase text-[10px] font-bold tracking-widest text-[#FFC000]">
+                            <Trash2 className="mr-2 h-4 w-4" /> Purge
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -186,11 +183,11 @@ function StatCard({ title, value, icon }: any) {
   return (
     <Card className="border-border bg-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-text-secondary">{title}</CardTitle>
-        <div className="text-text-muted">{icon}</div>
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7D7D7D]">{title}</CardTitle>
+        <div className="text-[#FFC000]">{icon}</div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-text-primary">{value}</div>
+        <div className="text-3xl font-bold text-white tracking-tighter uppercase">{value}</div>
       </CardContent>
     </Card>
   );

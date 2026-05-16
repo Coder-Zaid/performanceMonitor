@@ -1,10 +1,9 @@
 import { DailyTargetsCard } from "./_components/daily-targets-card";
 import { SubmissionForm } from "./_components/submission-form";
-import { auth } from "@/auth";
+import { currentUser } from "@clerk/nextjs/server";
 
 export default async function EmployeeDashboard() {
-  const session = await auth();
-  const user = session?.user as any;
+  const user = await currentUser();
 
   return (
     <div className="space-y-8">

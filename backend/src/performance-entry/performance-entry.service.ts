@@ -63,19 +63,44 @@ export class PerformanceEntryService {
     });
   }
 
-  async getSummary(userId: string) {
-    // Basic summary for the employee dashboard
+  async getSummary(userId: string, orgId: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { teams: true },
+    });
+    if (!user) return [];
+
+    const teamIds = user.teams.map((t) => t.teamId);
+
+    const kpis = await this.prisma.kpi.findMany({
+      where: {
+        orgId,
+        isActive: true,
+        OR: [
+          { departmentId: null, teamId: null },
+          { departmentId: user.departmentId },
+          { teamId: { in: teamIds } },
+        ],
+      },
+    });
+
     const entries = await this.findByDate(userId, today);
     
-    // In a real app, we'd also fetch targets here
-    return {
-      entries,
-      count: entries.length,
-      lastUpdated: new Date(),
-    };
+    return kpis.map((kpi) => {
+      const entry = entries.find((e) => e.kpiId === kpi.id);
+      const current = entry ? entry.submittedValue : 0;
+      const target = kpi.targetValue || 100;
+      return {
+        kpiName: kpi.name,
+        current,
+        target,
+        percentage: Math.min(100, Math.round((current / target) * 100)),
+        unit: kpi.unit || '',
+      };
+    });
   }
 
   async findPending(orgId: string, managerId?: string) {

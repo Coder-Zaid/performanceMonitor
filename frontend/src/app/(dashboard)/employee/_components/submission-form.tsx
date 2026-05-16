@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { useAuth } from "@clerk/nextjs";
+import { useApiClient } from "@/lib/api-client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,14 +30,17 @@ interface KPI {
 export function SubmissionForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { getApiClient } = useApiClient();
+  const { isLoaded, isSignedIn } = useAuth();
 
   const { data: kpis, isLoading, isError } = useQuery<KPI[]>({
     queryKey: ["my-kpis"],
-    queryFn: () => apiClient.get("/kpis/my"),
+    queryFn: () => getApiClient().get("/kpis/my"),
+    enabled: isLoaded && !!isSignedIn,
   });
 
   const mutation = useMutation({
-    mutationFn: (values: any) => apiClient.post("/performance-entries", values),
+    mutationFn: (values: any) => getApiClient().post("/performance-entries", values),
     onSuccess: () => {
       toast({ title: "Success", description: "Performance entry submitted!" });
       queryClient.invalidateQueries({ queryKey: ["performance-summary"] });

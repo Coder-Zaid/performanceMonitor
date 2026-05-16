@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Open_Sans, JetBrains_Mono } from "next/font/google";
+import { Montserrat, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { RootProvider } from "@/components/providers/root-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { ClerkProvider } from "@clerk/nextjs";
 
-const openSans = Open_Sans({
+const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-sans",
   weight: ["300", "400", "500", "600", "700", "800"],
@@ -28,16 +29,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/rosehot-free-version" />
-      </head>
-      <body className={`${openSans.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <RootProvider>
-          {children}
-          <Toaster />
-        </RootProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/rosehot-free-version" />
+        </head>
+        <body className={`${montserrat.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+          <RootProvider>
+            {children}
+            <Toaster />
+          </RootProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

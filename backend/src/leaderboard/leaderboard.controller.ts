@@ -1,10 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { LeaderboardService } from './leaderboard.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { ClerkAuthGuard } from '../common/guards/clerk-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('leaderboards')
-@UseGuards(JwtAuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class LeaderboardController {
   constructor(private leaderboardService: LeaderboardService) {}
 

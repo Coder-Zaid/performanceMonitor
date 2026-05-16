@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { useApiClient } from "@/lib/api-client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,10 +18,11 @@ interface Ranking {
 
 export default function LeaderboardPage() {
   const [period, setPeriod] = useState("daily");
+  const { getApiClient } = useApiClient();
 
   const { data: rankings, isLoading } = useQuery<Ranking[]>({
     queryKey: ["leaderboard", period],
-    queryFn: () => apiClient.get(`/leaderboards?period=${period}`),
+    queryFn: () => getApiClient().get(`/leaderboards?period=${period}`),
   });
 
   return (

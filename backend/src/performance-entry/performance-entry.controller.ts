@@ -1,13 +1,13 @@
 import { Controller, Post, Get, Body, UseGuards, Param } from '@nestjs/common';
 import { PerformanceEntryService } from './performance-entry.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { ClerkAuthGuard } from '../common/guards/clerk-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 
 @Controller('performance-entries')
-@UseGuards(JwtAuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class PerformanceEntryController {
   constructor(private performanceEntryService: PerformanceEntryService) {}
 
@@ -18,7 +18,7 @@ export class PerformanceEntryController {
 
   @Get('summary')
   getSummary(@CurrentUser() user: any) {
-    return this.performanceEntryService.getSummary(user.id);
+    return this.performanceEntryService.getSummary(user.id, user.orgId);
   }
 
   @Get('pending')

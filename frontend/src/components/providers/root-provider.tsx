@@ -2,8 +2,6 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { SessionProvider } from "next-auth/react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useState } from "react";
 
 export function RootProvider({ children }: { children: React.ReactNode }) {
@@ -17,18 +15,11 @@ export function RootProvider({ children }: { children: React.ReactNode }) {
   }));
 
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <NextThemesProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <ReactQueryDevtools initialIsOpen={false} />
-        </NextThemesProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <div className="dark">
+        {children}
+      </div>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }

@@ -1,19 +1,19 @@
-import { auth } from "@/auth";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export default async function RootDashboardPage() {
-  const session = await auth();
+  const { userId, sessionClaims } = await auth();
 
-  if (!session) {
+  if (!userId) {
     redirect("/login");
   }
 
-  const user = session.user as any;
+  const role = (sessionClaims?.publicMetadata as any)?.role || "employee";
 
   // Redirect to role-specific dashboard
-  if (user.role === "founder" || user.role === "super_admin") {
+  if (role === "founder" || role === "super_admin") {
     redirect("/founder");
-  } else if (user.role === "manager") {
+  } else if (role === "manager") {
     redirect("/manager");
   } else {
     redirect("/employee");

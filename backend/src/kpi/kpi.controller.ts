@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { KpiService } from './kpi.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { ClerkAuthGuard } from '../common/guards/clerk-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('kpis')
-@UseGuards(JwtAuthGuard)
+@UseGuards(ClerkAuthGuard)
 export class KpiController {
   constructor(private readonly kpiService: KpiService) {}
 

@@ -1,6 +1,6 @@
-# ITSPRELUDE Performance System
+# Performance Management System
 
-AI-powered workforce performance & productivity management platform, styled with a **Lamborghini-inspired design system** — true black surfaces, gold accents, dramatic typography.
+AI-powered workforce performance & productivity management platform, styled with a modern design system — true black surfaces, gold accents, dramatic typography.
 
 ## Tech Stack
 
@@ -10,7 +10,7 @@ AI-powered workforce performance & productivity management platform, styled with
 | **Backend** | NestJS 11, Prisma, Passport/JWT, SQLite |
 | **Auth** | NextAuth v5 (Credentials provider) |
 | **Charts** | Recharts |
-| **Font** | Rosehot (display), Open Sans (body) |
+| **Font** | Sans-serif (display), Open Sans (body) |
 
 ## Getting Started
 
@@ -44,13 +44,13 @@ npx prisma db seed
 **Backend** (`backend/.env`):
 ```
 DATABASE_URL="file:./dev.db"
-JWT_SECRET="p3rformance_syst3m_s3cr3t_123!"
+JWT_SECRET="secure_system_secret_123!"
 PORT=3001
 ```
 
 **Frontend** (`frontend/.env.local`):
 ```
-NEXTAUTH_SECRET=p3rformance_syst3m_s3cr3t_123!
+NEXTAUTH_SECRET=secure_system_secret_123!
 NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 ```
@@ -73,14 +73,14 @@ Open **http://localhost:3000**
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Founder** | founder@prelude.com | password123 |
-| **Manager** | manager@prelude.com | password123 |
-| **Employee** | employee@prelude.com | password123 |
+| **Founder** | founder@example.com | password123 |
+| **Manager** | manager@example.com | password123 |
+| **Employee** | employee@example.com | password123 |
 
 ## Architecture
 
 ```
-itsprelude-performance-system/
+performance-management-system/
 ├── backend/                # NestJS API
 │   ├── prisma/
 │   │   ├── schema.prisma   # DB schema
@@ -97,7 +97,7 @@ itsprelude-performance-system/
 │       │   └── ui/         # shadcn/ui components
 │       └── lib/            # Utilities, API client
 ├── e2e/                    # Playwright tests
-└── DESIGN.md               # Lamborghini design system spec
+└── docs/design/spec.md      # Design system spec
 ```
 
 ## Features
@@ -112,4 +112,4 @@ itsprelude-performance-system/
 
 ## Design System
 
-Inspired by **Lamborghini** — true black (`#000000`) canvas, Lamborghini Gold (`#FFC000`) accents, Rosehot display type for dramatic uppercase headings. Full spec in [`DESIGN.md`](./DESIGN.md).
+Inspired by high-performance geometric aesthetics — true black (`#000000`) canvas, gold accents, and dramatic typography. Full spec in [`docs/design/spec.md`](./docs/design/spec.md).

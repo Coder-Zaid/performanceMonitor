@@ -63,13 +63,21 @@ export function Sidebar({ role }: { role: string }) {
               href={item.href}
               title={item.name}
               className={cn(
-                "flex items-center space-x-3 px-3 py-3 text-[10px] font-bold tracking-[0.1em] uppercase transition-all font-sans",
+                "group flex items-center space-x-3 px-3 py-3 rounded-lg text-[10px] font-bold tracking-[0.1em] uppercase transition-all duration-300 font-sans relative overflow-hidden",
                 isActive
-                  ? "bg-[#FFC000] text-black"
-                  : "text-white/60 hover:bg-white/5 hover:text-white"
+                  ? "bg-[#FFC000] text-black shadow-[0_0_15px_rgba(255,192,0,0.1)]"
+                  : "text-white/60 hover:bg-white/5 hover:text-white hover:translate-x-1"
               )}
             >
-              <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-black" : "text-white/60")} />
+              {isActive && (
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#917300] rounded-l-lg" />
+              )}
+              <item.icon 
+                className={cn(
+                  "h-4 w-4 shrink-0 transition-transform duration-300", 
+                  isActive ? "text-black" : "text-white/60 group-hover:scale-110 group-hover:text-[#FFC000]"
+                )} 
+              />
               {!isCollapsed && <span>{item.name}</span>}
             </Link>
           );
