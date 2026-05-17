@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -65,9 +66,13 @@ export default function ForgotPasswordPage() {
             We have sent a password reset link to your email address.
           </p>
         </div>
-        <Button variant="outline" className="w-full" asChild>
-          <Link href="/login" title="Login">Back to login</Link>
-        </Button>
+        <Link
+          href="/login"
+          title="Login"
+          className={cn(buttonVariants({ variant: "outline" }), "w-full text-center")}
+        >
+          Back to login
+        </Link>
       </div>
     );
   }

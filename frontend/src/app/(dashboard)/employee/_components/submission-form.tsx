@@ -70,18 +70,20 @@ export function SubmissionForm() {
   );
 }
 
-function SingleKpiForm({ kpi, mutation }: { kpi: KPI; mutation: any }) {
-  const formSchema = z.object({
-    value: z.coerce.number().min(0),
-    notes: z.string().optional(),
-  });
+const formSchema = z.object({
+  value: z.number().min(0),
+  notes: z.string().optional(),
+});
 
-  const form = useForm<z.infer<typeof formSchema>>({
+type FormValues = z.infer<typeof formSchema>;
+
+function SingleKpiForm({ kpi, mutation }: { kpi: KPI; mutation: any }) {
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { value: 0, notes: "" },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: FormValues) {
     mutation.mutate({ kpiId: kpi.id, ...values });
   }
 
@@ -96,7 +98,14 @@ function SingleKpiForm({ kpi, mutation }: { kpi: KPI; mutation: any }) {
               <FormItem>
                 <FormLabel>{kpi.name} ({kpi.unit})</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? "" : Number(val));
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

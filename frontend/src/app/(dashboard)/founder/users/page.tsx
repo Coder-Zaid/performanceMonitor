@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, UserPlus, Mail, MoreHorizontal } from "lucide-react";
+import { Plus, UserPlus, Mail, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

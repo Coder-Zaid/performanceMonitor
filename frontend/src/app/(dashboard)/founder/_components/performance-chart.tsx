@@ -75,7 +75,7 @@ export function PerformanceChart() {
                 stroke="#555555"
                 strokeDasharray="5 5"
                 strokeWidth={1}
-                fill={false}
+                fill="none"
               />
             </AreaChart>
           </ResponsiveContainer>
