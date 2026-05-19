@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, UserPlus, Mail, MoreVertical } from "lucide-react";
+import { Plus, UserPlus, Mail, MoreHorizontal, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,8 +92,8 @@ export default function UsersPage() {
                   <TableCell>{user.department?.name || "Unassigned"}</TableCell>
                   <TableCell>
                     <Badge className={
-                      user.employmentStatus === 'active' 
-                        ? 'bg-accent-success/20 text-accent-success hover:bg-accent-success/20' 
+                      user.employmentStatus === 'active'
+                        ? 'bg-accent-success/20 text-accent-success hover:bg-accent-success/20'
                         : 'bg-text-muted/20 text-text-muted'
                     }>
                       {user.employmentStatus}
