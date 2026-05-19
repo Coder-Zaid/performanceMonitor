@@ -26,13 +26,12 @@ export class PerformanceEntryService {
     });
 
     if (existing) {
-      // Update existing entry or throw error? 
-      // For now, let's update it to allow "re-submission"
+      // Add the new value to the existing value instead of overwriting it
       return this.prisma.performanceEntry.update({
         where: { id: existing.id },
         data: {
-          submittedValue: dto.value,
-          notes: dto.notes,
+          submittedValue: existing.submittedValue + dto.value,
+          notes: dto.notes ? (existing.notes ? `${existing.notes}; ${dto.notes}` : dto.notes) : existing.notes,
           status: 'pending', // Reset status to pending on update
         },
       });

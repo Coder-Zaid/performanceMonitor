@@ -43,21 +43,38 @@ export class ClerkAuthGuard implements CanActivate {
 
       // Extract role from publicMetadata
       const publicMetadata = (decoded as any).publicMetadata || (decoded as any).public_metadata || {};
-      const role = publicMetadata.role || 'employee';
+      let role = publicMetadata.role || 'employee';
+
+      // Check for dev_role override cookie
+      const cookieHeader = request.headers.cookie || '';
+      const match = cookieHeader.match(/dev_role=([^;]+)/);
+      if (match && ['founder', 'manager', 'employee', 'super_admin'].includes(match[1])) {
+        role = match[1];
+      }
 
       // To ensure the dashboard works seamlessly, we'll try to map the Clerk user to a seeded DB user
       let dbUser: any = null;
 
       try {
-        // Fetch full clerk user to get email
-        const clerkUser = await this.clerkClient.users.getUser(decoded.sub);
-        const email = clerkUser.emailAddresses[0]?.emailAddress;
-
-        if (email) {
-          dbUser = await this.prisma.user.findUnique({ 
-            where: { email },
+        // If we have a devRole override, we specifically look up the database user with that role first!
+        if (match && ['founder', 'manager', 'employee', 'super_admin'].includes(match[1])) {
+          dbUser = await this.prisma.user.findFirst({
+            where: { role: { name: match[1] } },
             include: { role: true }
           });
+        }
+
+        // Otherwise, standard mapping via Clerk user email
+        if (!dbUser) {
+          const clerkUser = await this.clerkClient.users.getUser(decoded.sub);
+          const email = clerkUser.emailAddresses[0]?.emailAddress;
+
+          if (email) {
+            dbUser = await this.prisma.user.findUnique({ 
+              where: { email },
+              include: { role: true }
+            });
+          }
         }
       } catch (e) {
         console.warn('Could not fetch clerk user details for mapping:', e.message);

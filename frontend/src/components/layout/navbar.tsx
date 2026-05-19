@@ -2,6 +2,8 @@
 
 import { useUser, useClerk } from "@clerk/nextjs";
 import { Bell, User, LogOut, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -19,7 +21,25 @@ import Link from "next/link";
 export function Navbar() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
-  const role = (user?.publicMetadata as any)?.role || "employee";
+  
+  const [activeRole, setActiveRole] = useState<string>("employee");
+
+  useEffect(() => {
+    const match = document.cookie.match(/dev_role=([^;]+)/);
+    const roleFromCookie = match ? match[1] : null;
+    setActiveRole(roleFromCookie || (user?.publicMetadata as any)?.role || "employee");
+  }, [user]);
+
+  const handleRoleSwitch = (newRole: string | null) => {
+    if (newRole) {
+      document.cookie = `dev_role=${newRole}; path=/; max-age=31536000;`; // 1 year
+    } else {
+      document.cookie = "dev_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+    window.location.href = "/";
+  };
+
+  const role = activeRole;
 
   const { getApiClient } = useApiClient();
 
@@ -133,6 +153,34 @@ export function Navbar() {
                   <Settings className="h-4 w-4" /> Settings
                 </DropdownMenuItem>
               </Link>
+              <DropdownMenuSeparator className="bg-[#202020]" />
+              <div className="text-[9px] text-[#7D7D7D] uppercase tracking-widest px-3 py-2 font-bold select-none">
+                Dev Role Switcher
+              </div>
+              <DropdownMenuItem
+                className={cn("hover:bg-white/5 cursor-pointer flex items-center justify-between text-xs", activeRole === "founder" && "text-[#FFC000]")}
+                onClick={() => handleRoleSwitch("founder")}
+              >
+                Founder View {activeRole === "founder" && <span className="text-xs">✓</span>}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className={cn("hover:bg-white/5 cursor-pointer flex items-center justify-between text-xs", activeRole === "manager" && "text-[#FFC000]")}
+                onClick={() => handleRoleSwitch("manager")}
+              >
+                Manager View {activeRole === "manager" && <span className="text-xs">✓</span>}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className={cn("hover:bg-white/5 cursor-pointer flex items-center justify-between text-xs", activeRole === "employee" && "text-[#FFC000]")}
+                onClick={() => handleRoleSwitch("employee")}
+              >
+                Employee View {activeRole === "employee" && <span className="text-xs">✓</span>}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="hover:bg-white/5 cursor-pointer text-[10px] text-red-400/80 hover:text-red-400"
+                onClick={() => handleRoleSwitch(null)}
+              >
+                Reset to Clerk Default
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#202020]" />
               <DropdownMenuItem
                 className="text-white hover:bg-white/5 cursor-pointer"

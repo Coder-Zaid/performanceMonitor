@@ -11,7 +11,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  @Roles('founder', 'super_admin')
+  @Roles('founder', 'super_admin', 'manager')
   @UseGuards(RolesGuard)
   findAll(@CurrentUser() user: any) {
     return this.userService.findAll(user.orgId);

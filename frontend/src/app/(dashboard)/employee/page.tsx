@@ -1,5 +1,6 @@
 import { DailyTargetsCard } from "./_components/daily-targets-card";
 import { SubmissionForm } from "./_components/submission-form";
+import { AssignedTasksCard } from "./_components/assigned-tasks-card";
 import { currentUser } from "@clerk/nextjs/server";
 
 export default async function EmployeeDashboard() {
@@ -34,6 +35,7 @@ export default async function EmployeeDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <SubmissionForm />
         <div className="space-y-6">
+          <AssignedTasksCard />
           <div className="p-6 bg-card rounded-lg border border-border shadow-sm">
             <h3 className="text-lg font-semibold mb-4">Recent Submissions</h3>
             <div className="space-y-3">

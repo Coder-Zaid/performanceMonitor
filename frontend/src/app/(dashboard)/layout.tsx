@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Navbar } from "@/components/layout/navbar";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export default async function DashboardLayout({
   children,
@@ -14,7 +15,9 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const role = (sessionClaims?.publicMetadata as any)?.role || "employee";
+  const cookieStore = await cookies();
+  const devRole = cookieStore.get("dev_role")?.value;
+  const role = devRole || (sessionClaims?.publicMetadata as any)?.role || "employee";
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

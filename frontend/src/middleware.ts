@@ -20,7 +20,8 @@ export default clerkMiddleware(async (auth, req) => {
 
     // But if a logged-in user hits /login or /register, bounce them to their dashboard
     if (userId) {
-      const role = (sessionClaims?.publicMetadata as any)?.role || "employee";
+      const devRole = req.cookies.get("dev_role")?.value;
+      const role = devRole || (sessionClaims?.publicMetadata as any)?.role || "employee";
       if (role === "super_admin") return NextResponse.redirect(new URL("/super-admin", nextUrl));
       if (role === "founder")     return NextResponse.redirect(new URL("/founder", nextUrl));
       if (role === "manager")     return NextResponse.redirect(new URL("/manager", nextUrl));
@@ -41,7 +42,8 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  const role = (sessionClaims?.publicMetadata as any)?.role || "employee";
+  const devRole = req.cookies.get("dev_role")?.value;
+  const role = devRole || (sessionClaims?.publicMetadata as any)?.role || "employee";
 
   // Role-based route guards
   if (nextUrl.pathname.startsWith("/super-admin") && role !== "super_admin") {

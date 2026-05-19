@@ -27,7 +27,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  role: { id: string; name: string } | string;
   department?: { name: string };
   employmentStatus: string;
   profileImageUrl?: string;
@@ -86,7 +86,7 @@ export default function UsersPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="capitalize">
-                      {user.role.replace('_', ' ')}
+                      {typeof user.role === "object" ? user.role.name.replace('_', ' ') : user.role.replace('_', ' ')}
                     </Badge>
                   </TableCell>
                   <TableCell>{user.department?.name || "Unassigned"}</TableCell>

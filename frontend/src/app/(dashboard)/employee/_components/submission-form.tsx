@@ -28,8 +28,6 @@ interface KPI {
 }
 
 export function SubmissionForm() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { getApiClient } = useApiClient();
   const { isLoaded, isSignedIn } = useAuth();
 
@@ -37,17 +35,6 @@ export function SubmissionForm() {
     queryKey: ["my-kpis"],
     queryFn: () => getApiClient().get("/kpis/my"),
     enabled: isLoaded && !!isSignedIn,
-  });
-
-  const mutation = useMutation({
-    mutationFn: (values: any) => getApiClient().post("/performance-entries", values),
-    onSuccess: () => {
-      toast({ title: "Success", description: "Performance entry submitted!" });
-      queryClient.invalidateQueries({ queryKey: ["performance-summary"] });
-    },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Error", description: error.message });
-    },
   });
 
   if (isLoading) return <SubmissionSkeleton />;
@@ -62,7 +49,7 @@ export function SubmissionForm() {
       <CardContent>
         <div className="grid gap-6">
           {kpis.map((kpi) => (
-            <SingleKpiForm key={kpi.id} kpi={kpi} mutation={mutation} />
+            <SingleKpiForm key={kpi.id} kpi={kpi} />
           ))}
         </div>
       </CardContent>
@@ -77,10 +64,27 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-function SingleKpiForm({ kpi, mutation }: { kpi: KPI; mutation: any }) {
+function SingleKpiForm({ kpi }: { kpi: KPI }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { getApiClient } = useApiClient();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { value: 0, notes: "" },
+  });
+
+  const mutation = useMutation({
+    mutationFn: (values: any) => getApiClient().post("/performance-entries", values),
+    onSuccess: () => {
+      toast({ title: "Success", description: "Performance entry submitted!" });
+      queryClient.invalidateQueries({ queryKey: ["performance-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["daily-targets"] });
+      form.reset({ value: 0, notes: "" });
+    },
+    onError: (error: any) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
   });
 
   function onSubmit(values: FormValues) {

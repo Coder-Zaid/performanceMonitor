@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -21,7 +21,7 @@ import { useState } from "react";
 
 const menuItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["super_admin", "founder", "manager", "employee"] },
-  { name: "Reviews", href: "/manager", icon: FileText, roles: ["manager"] },
+  { name: "Assign Tasks", href: "/manager?tab=tasks", icon: Target, roles: ["manager"] },
   { name: "Employees", href: "/founder/users", icon: Users, roles: ["super_admin", "founder"] },
   { name: "Leaderboard", href: "/leaderboard", icon: Trophy, roles: ["super_admin", "founder", "manager", "employee"] },
   { name: "Departments", href: "/founder/departments", icon: Building2, roles: ["super_admin", "founder"] },
@@ -32,9 +32,11 @@ const menuItems = [
 
 export function Sidebar({ role }: { role: string }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const filteredMenu = menuItems.filter((item) => item.roles.includes(role));
+  const activeTab = searchParams.get("tab");
 
   return (
     <aside
@@ -56,7 +58,19 @@ export function Sidebar({ role }: { role: string }) {
       </div>
       <nav className="flex-1 space-y-2 p-4 overflow-y-auto">
         {filteredMenu.map((item) => {
-          const isActive = pathname === item.href;
+          let isActive = false;
+          if (item.href === "/") {
+            isActive = pathname === "/";
+          } else if (item.href.startsWith("/manager")) {
+            if (item.href.includes("tab=tasks")) {
+              isActive = pathname === "/manager" && activeTab === "tasks";
+            } else {
+              isActive = pathname === "/manager" && activeTab !== "tasks";
+            }
+          } else {
+            isActive = pathname === item.href;
+          }
+
           return (
             <Link
               key={item.href}
